@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Animated, TouchableOpacity } from "react-native";
 import styled from "styled-components/native";
 
 const Container = styled.View`
@@ -7,33 +8,39 @@ const Container = styled.View`
   align-items: center;
 `;
 
-const Box = styled.TouchableOpacity`
+const Box = styled.View`
   background-color: tomato;
   width: 200px;
   height: 200px;
 `;
 
+const AnimatedBox = Animated.createAnimatedComponent(Box);
+
 export default function App() {
-  const [y, setY] = useState(0);
-  const [intervalId, setIntervalId] = useState(null);
+  const Y = new Animated.Value(0);
+
   const moveUp = () => {
-    const id = setInterval(() => setY((prev) => prev + 1), 1);
-    setIntervalId(id);
+    Animated.spring(Y, {
+      toValue: 200,
+      // bounciness와 friction을 함께 사용하지 못함(에러 발생)
+      // bounciness: 50,
+      tension: 50,
+      friction: 1,
+      // Bridge를 통하지 않고 모든 것을 Native로 보냄
+      useNativeDriver: true,
+    }).start();
   };
-  useEffect(() => {
-    if (y === 200) {
-      clearInterval(intervalId);
-    }
-  }, [y, intervalId]);
-  console.log("rendering");
+  // console.log(Y); // Y값이 변하지 않음(React Component를 리랜더링하는 것이 아니기 때문)
+  Y.addListener(() => console.log(Y));
   return (
     <Container>
-      <Box
-        onPress={moveUp}
-        style={{
-          transform: [{ translateY: y }],
-        }}
-      />
+      <TouchableOpacity onPress={moveUp}>
+        <AnimatedBox
+          style={{
+            transform: [{ translateY: Y }],
+          }}
+        />
+      </TouchableOpacity>
     </Container>
   );
 }
