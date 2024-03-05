@@ -29,18 +29,21 @@ export default function App() {
     }).start(toggleUp);
   };
 
-  const opacity = Y_POSITION.interpolate({
-    inputRange: [-300, -100, 100, 300],
-    outputRange: [1, 0, 0, 1],
+  const rotaion = Y_POSITION.interpolate({
+    inputRange: [-300, 300],
+    outputRange: ["-360deg", "360deg"],
   });
   const borderRadius = Y_POSITION.interpolate({
     inputRange: [-300, 300],
     outputRange: [100, 0],
   });
+  const bgColor = Y_POSITION.interpolate({
+    inputRange: [-300, 300],
+    outputRange: ["rgb(255, 99, 71)", "rgb(71, 166, 255)"],
+  });
+
   Y_POSITION.addListener(() => {
-    console.log("Y Value: ", Y_POSITION);
-    console.log("opacity Value: ", opacity);
-    console.log("borderRadius Value: ", borderRadius);
+    console.log(bgColor);
   });
   return (
     <Container>
@@ -48,8 +51,8 @@ export default function App() {
         <AnimatedBox
           style={{
             borderRadius,
-            opacity,
-            transform: [{ translateY: Y_POSITION }],
+            backgroundColor: bgColor,
+            transform: [{ rotateY: rotaion }, { translateY: Y_POSITION }],
           }}
         />
       </Pressable>
