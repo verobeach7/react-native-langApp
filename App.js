@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Animated, Pressable, Dimensions, Easing } from "react-native";
+import React, { useRef } from "react";
+import { Animated, PanResponder } from "react-native";
 import styled from "styled-components/native";
 
 const Container = styled.View`
@@ -7,57 +7,20 @@ const Container = styled.View`
   justify-content: center;
   align-items: center;
 `;
-
 const Box = styled.View`
   background-color: tomato;
   width: 200px;
   height: 200px;
 `;
-
 const AnimatedBox = Animated.createAnimatedComponent(Box);
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function App() {
   const POSITION = useRef(
     new Animated.ValueXY({
-      x: -SCREEN_WIDTH / 2 + 100,
-      y: -SCREEN_HEIGHT / 2 + 100,
+      x: 0,
+      y: 0,
     })
   ).current;
-  const topLeft = Animated.timing(POSITION, {
-    toValue: {
-      x: -SCREEN_WIDTH / 2 + 100,
-      y: -SCREEN_HEIGHT / 2 + 100,
-    },
-    useNativeDriver: false,
-  });
-  const bottomLeft = Animated.timing(POSITION, {
-    toValue: {
-      x: -SCREEN_WIDTH / 2 + 100,
-      y: SCREEN_HEIGHT / 2 - 100,
-    },
-    useNativeDriver: false,
-  });
-  const bottomRight = Animated.timing(POSITION, {
-    toValue: {
-      x: SCREEN_WIDTH / 2 - 100,
-      y: SCREEN_HEIGHT / 2 - 100,
-    },
-    useNativeDriver: false,
-  });
-  const topRight = Animated.timing(POSITION, {
-    toValue: {
-      x: SCREEN_WIDTH / 2 - 100,
-      y: -SCREEN_HEIGHT / 2 + 100,
-    },
-    useNativeDriver: false,
-  });
-  const moveUp = () => {
-    Animated.loop(
-      Animated.sequence([bottomLeft, bottomRight, topRight, topLeft])
-    ).start();
-  };
   const borderRadius = POSITION.y.interpolate({
     inputRange: [-300, 300],
     outputRange: [100, 0],
@@ -66,17 +29,35 @@ export default function App() {
     inputRange: [-300, 300],
     outputRange: ["rgb(255, 99, 71)", "rgb(71, 166, 255)"],
   });
+  // state가 변해도 panResponder가 설정된 AnimatedBox는 리랜더링 되지 않도록 useRef 사용
+  const panResponder = useRef(
+    // PanResponder 생성
+    PanResponder.create({
+      // 터치를 감지하도록 설정
+      onStartShouldSetPanResponder: () => true,
+      // 거리가 변하면 이를 AnimatedBox에 적용
+      onPanResponderMove: (_, { dx, dy }) => {
+        // 위치값 설정
+        POSITION.setValue({
+          // distance of x
+          x: dx,
+          // distance of y
+          y: dy,
+        });
+      },
+    })
+  ).current;
   return (
     <Container>
-      <Pressable onPress={moveUp}>
-        <AnimatedBox
-          style={{
-            borderRadius,
-            backgroundColor: bgColor,
-            transform: [...POSITION.getTranslateTransform()],
-          }}
-        />
-      </Pressable>
+      <AnimatedBox
+        // panHanders가 가지고 있는 function들을 사용할 수 있게 설정
+        {...panResponder.panHandlers}
+        style={{
+          borderRadius,
+          backgroundColor: bgColor,
+          transform: [...POSITION.getTranslateTransform()],
+        }}
+      />
     </Container>
   );
 }
