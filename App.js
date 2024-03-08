@@ -35,10 +35,7 @@ export default function App() {
       // 터치가 시작될 때 실행됨
       onPanResponderGrant: () => {
         console.log("Touch Started");
-        POSITION.setOffset({
-          x: POSITION.x._value,
-          y: POSITION.y._value,
-        });
+        POSITION.extractOffset();
       },
       // 터치하여 객체를 움직일 때 실행됨
       onPanResponderMove: (_, { dx, dy }) => {
