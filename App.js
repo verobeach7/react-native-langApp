@@ -29,11 +29,13 @@ export default function App() {
       },
       onPanResponderGrant: () => onPressIn(),
       onPanResponderRelease: () => {
-        onPressOut();
-        Animated.spring(position, {
-          toValue: 0,
-          useNativeDriver: true,
-        }).start();
+        Animated.parallel([
+          onPressOut,
+          Animated.spring(position, {
+            toValue: 0,
+            useNativeDriver: true,
+          }),
+        ]).start();
       },
     })
   ).current;
@@ -41,11 +43,10 @@ export default function App() {
   const position = useRef(new Animated.Value(0)).current;
   const onPressIn = () =>
     Animated.spring(scale, { toValue: 0.95, useNativeDriver: true }).start();
-  const onPressOut = () =>
-    Animated.spring(scale, {
-      toValue: 1,
-      useNativeDriver: true,
-    }).start();
+  const onPressOut = Animated.spring(scale, {
+    toValue: 1,
+    useNativeDriver: true,
+  });
   return (
     <Container>
       <Card
