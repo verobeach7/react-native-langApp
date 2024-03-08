@@ -32,21 +32,26 @@ export default function App() {
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
+      // 터치가 시작될 때 실행됨
+      onPanResponderGrant: () => {
+        console.log("Touch Started");
+        POSITION.setOffset({
+          x: POSITION.x._value,
+          y: POSITION.y._value,
+        });
+      },
+      // 터치하여 객체를 움직일 때 실행됨
       onPanResponderMove: (_, { dx, dy }) => {
+        console.log("Finger Moving");
         POSITION.setValue({
           x: dx,
           y: dy,
         });
       },
+      // 터치가 끝났을 때 실행됨
       onPanResponderRelease: () => {
-        Animated.spring(POSITION, {
-          toValue: {
-            x: 0,
-            y: 0,
-          },
-          bounciness: 20,
-          useNativeDriver: false,
-        }).start();
+        console.log("Touch Finished");
+        POSITION.flattenOffset();
       },
     })
   ).current;
@@ -57,7 +62,6 @@ export default function App() {
         style={{
           borderRadius,
           backgroundColor: bgColor,
-          // css로 변환해줌
           transform: POSITION.getTranslateTransform(),
         }}
       />
